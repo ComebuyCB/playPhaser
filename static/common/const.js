@@ -24,7 +24,7 @@ let data = {
         fireball: {
             active: true,
             damage: 5,
-            spawnPerMS: 500,
+            spawnPerMS: 300,
             maxAmount: 100,
             speed: 150,
         },
@@ -57,8 +57,9 @@ let gui_weapon = gui.addFolder('Weapon');
 let gui_fireball = gui_weapon.addFolder('Fireball');
     gui_fireball.add(data.weapon.fireball, 'active');
     gui_fireball.add(data.weapon.fireball, 'damage').min(1).max(100).step(1);
-    gui_fireball.add(data.weapon.fireball, 'spawnPerMS').min(10).max(5000).step(10).onChange((val)=>{
+    gui_fireball.add(data.weapon.fireball, 'spawnPerMS').min(10).max(3000).step(10).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         scene.fireballTime.delay = val
     })
     gui_fireball.add(data.weapon.fireball, 'maxAmount').min(1).max(1000).step(1);
+    gui_fireball.add(data.weapon.fireball, 'speed').min(1).max(1000).step(1);

@@ -1,13 +1,12 @@
 const gamePlay = {
     key: 'gamePlay',
     preload(){
-        this.load.image('map','/static/img/map2.jpg')
-        this.load.spritesheet('personImg', '/static/img/player2.png', { frameWidth: 47, frameHeight: 71, } )
-        this.load.spritesheet('fireballImg', '/static/img/fireball.png', { frameWidth: 512, frameHeight: 512, } )
+        this.load.image('map','static/img/map2.jpg')
+        this.load.spritesheet('personImg', 'static/img/player2.png', { frameWidth: 47, frameHeight: 71, } )
+        this.load.spritesheet('fireballImg', 'static/img/fireball.png', { frameWidth: 512, frameHeight: 512, } )
     },
     create(){
         let This = this
-
         console.log(this)
     /*=== map ===*/
         this.map = this.add.tileSprite(0, 0, cw, ch, 'map')
@@ -23,7 +22,6 @@ const gamePlay = {
                 })
             });
         }
-        console.log(this)
         
     /*=== player ===*/
         this.player = this.physics.add.sprite(cw/2, ch/2, 'person')
@@ -32,14 +30,11 @@ const gamePlay = {
         this.player.setOffset(12,10)
         this.player.setCollideWorldBounds(true)
         this.player.setBounce(1)
-        console.log( 'player', this.player )
 
         createPerson({key: 'p1', row: 0, col: 3, })
 
         this.player.anims.play('p1-down', true)
         this.myCam = this.cameras.main.startFollow(this.player)
-
-        console.log( this.player )
         
     /*=== enemies ===*/
         this.enemies = this.physics.add.group();
