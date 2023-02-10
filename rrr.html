@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #myCanvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.translate(250, 250);  // 將原點移到圖像中心
+        
+        // 螺旋線的繪製
+        var spiralRadius = 0;
+        var spiralRotation = 0;
+        var spiralWidth = 1;
+        var spiralIncrement = 1;
+        var spiralSpeed = 0.05;
+        function drawSpiral() {
+            spiralRadius += spiralIncrement;
+            spiralRotation += spiralSpeed;
+            var x = spiralRadius * Math.cos(spiralRotation);
+            var y = spiralRadius * Math.sin(spiralRotation);
+            ctx.lineTo(x, y);
+            ctx.lineWidth = spiralWidth;
+            ctx.stroke();
+            if (spiralRadius < 250) {
+            requestAnimationFrame(drawSpiral);
+            }
+        }
+        ctx.beginPath();
+        drawSpiral();
+    </script>
+
+</body>
+</html>

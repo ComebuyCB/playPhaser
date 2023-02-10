@@ -10,6 +10,14 @@ const preKeyDown = {
 
 let data = {
     debug: false,
+    world: {
+        bounce: {
+            x: 0 - cw / 2, 
+            y: 0 - ch / 2,
+            width: cw * 2,
+            height: ch * 2,
+        }
+    },
     enemy: {
         health: 20,
         spawnPerMS: 2000,
@@ -26,6 +34,14 @@ let data = {
             damage: 5,
             spawnPerMS: 300,
             maxAmount: 100,
+            speed: 200,
+        },
+        sword: {
+            active: true,
+            damage: 6,
+            damagePerFrame: 50,
+            spawnPerMS: 800,
+            maxAmount: 5,
             speed: 150,
         },
     },
@@ -39,14 +55,19 @@ let gui_enemy = gui.addFolder('Enemy');
     gui_enemy.add(data.enemy, 'health').min(1).max(1000).step(1).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         for( let i=0; i<scene.enemies.getChildren().length; i++ ){
-            scene.enemies.getChildren()[i].update()
+            scene.enemies.getChildren()[i].health = val
         }
     })
     gui_enemy.add(data.enemy, 'spawnPerMS').min(100).max(10000).step(100).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         scene.enemyTime.delay = val
     })
-    gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1);
+    gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1).onChange((val)=>{
+        let scene = game.scene.keys.gamePlay
+        for( let i=0; i<scene.enemies.getChildren().length; i++ ){
+            scene.enemies.getChildren()[i].moveSpeed = val
+        }
+    })
     gui_enemy.add(data.enemy, 'damage').min(1).max(300).step(1);
 
 let gui_player = gui.addFolder('Player');
@@ -63,3 +84,14 @@ let gui_fireball = gui_weapon.addFolder('Fireball');
     })
     gui_fireball.add(data.weapon.fireball, 'maxAmount').min(1).max(1000).step(1);
     gui_fireball.add(data.weapon.fireball, 'speed').min(1).max(1000).step(1);
+
+let gui_sword = gui_weapon.addFolder('sword');
+    gui_sword.add(data.weapon.sword, 'active');
+    gui_sword.add(data.weapon.sword, 'damage').min(1).max(100).step(1);
+    gui_sword.add(data.weapon.sword, 'damagePerFrame').min(1).max(1000).step(1);
+    gui_sword.add(data.weapon.sword, 'spawnPerMS').min(10).max(3000).step(10).onChange((val)=>{
+        let scene = game.scene.keys.gamePlay
+        scene.swordTime.delay = val
+    })
+    gui_sword.add(data.weapon.sword, 'maxAmount').min(1).max(100).step(1);
+    gui_sword.add(data.weapon.sword, 'speed').min(1).max(1000).step(1);
