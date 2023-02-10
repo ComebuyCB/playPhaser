@@ -60,7 +60,7 @@ let gui_enemy = gui.addFolder('Enemy');
     })
     gui_enemy.add(data.enemy, 'spawnPerMS').min(100).max(10000).step(100).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
-        scene.enemyTime.delay = val
+        scene.weapon.enemyTime.delay = val
     })
     gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
@@ -80,7 +80,7 @@ let gui_fireball = gui_weapon.addFolder('Fireball');
     gui_fireball.add(data.weapon.fireball, 'damage').min(1).max(100).step(1);
     gui_fireball.add(data.weapon.fireball, 'spawnPerMS').min(10).max(3000).step(10).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
-        scene.fireballTime.delay = val
+        scene.weapon.fireballTime.delay = val
     })
     gui_fireball.add(data.weapon.fireball, 'maxAmount').min(1).max(1000).step(1);
     gui_fireball.add(data.weapon.fireball, 'speed').min(1).max(1000).step(1);
