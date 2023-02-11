@@ -2,6 +2,7 @@ const gamePlay = {
     key: 'gamePlay',
     preload(){
         this.load.image('map','static/img/map.jpg' )
+        this.load.image('tree','static/img/tree.png' )
         this.load.image('border','static/img/border.png' )
         this.load.spritesheet('personImg', 'static/img/player2.png', { frameWidth: 47, frameHeight: 71, } )
         this.load.spritesheet('fireballImg', 'static/img/fireball.png', { frameWidth: 512, frameHeight: 512, } )
@@ -11,17 +12,18 @@ const gamePlay = {
         let This = this
         console.log(this)
 
-        console.log('text', this.add.text(5,5,'hello') )
-
     /*=== world ===*/
         const { x:bx, y:by, width:bw, height:bh, } = data.world.bounce
         this.physics.world.setBounds(bx, by, bw, bh)
 
     /*=== map ===*/
-    // this.map = this.add.sprite(0, 0, 'map')
+    // this.map = this.add.sprite(cw/2, ch/2, 'map')
         this.map = this.add.tileSprite(0, 0, cw, ch, 'map')
         this.map.setOrigin(0, 0)
         this.map.setScrollFactor(0)
+
+        // this.tree = this.add.tileSprite(cw/2, ch/2, cw, ch, 'tree')
+        // this.tree.setScrollFactor(0)
 
         const borderThick = {x:72, y:48,}
         this.border = this.add.sprite(cw/2, ch/2, 'border')
@@ -72,7 +74,7 @@ const gamePlay = {
     /*=== create objects per time ===*/
         this.hurtTexts = this.add.group();
         this.enemyTime = this.time.addEvent({ 
-            delay: data.enemy.spawnPerMS, 
+            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.enemy.spawnFPS, 
             repeat: -1,
             callback: () => {
                 new createEnemy(this)
@@ -80,7 +82,7 @@ const gamePlay = {
         })
 
         this.weapon.fireballTime = this.time.addEvent({ 
-            delay: data.weapon.fireball.spawnPerMS, 
+            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.weapon.fireball.spawnFPS, 
             repeat: -1, 
             callback: () => {
                 if ( data.weapon.fireball.active ){
@@ -111,7 +113,7 @@ const gamePlay = {
         })
 
         this.weapon.swordTime = this.time.addEvent({ 
-            delay: data.weapon.sword.spawnPerMS, 
+            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.weapon.sword.spawnFPS, 
             repeat: -1, 
             callback: () => {
                 if ( data.weapon.sword.active ){
@@ -119,6 +121,7 @@ const gamePlay = {
                 }
             }
         })
+        console.log( this )
 
 
     /*=== collider / overlay ===*/
@@ -145,12 +148,31 @@ const gamePlay = {
         this.physics.add.collider(this.player, this.enemies, function( player, enemy ){
             // enemy.destroy();
         })
+
+        this.toggleDebug = false;
     },
     update(){
         const This = this
+        if (this.toggleDebug === true) {
+            if ( this.physics.world?.debugGraphic?.clear === undefined ){
+                this.physics.world.createDebugGraphic();
+            }
+            if (data.debug) {
+                this.physics.world.drawDebug = true;
+            } else {
+                this.physics.world.drawDebug = false;
+                this.physics.world.debugGraphic.clear();
+            }
+            this.toggleDebug = false;
+        }
+
+        // console.log( this.sys.game.loop.frame, this.sys.game.loop.framesThisSecond )
     /*=== map ===*/
         this.map.tilePositionX = this.myCam.scrollX
         this.map.tilePositionY = this.myCam.scrollY
+        // this.map.tilePositionX = this.sys.game.loop.frame * 10 // 類似空戰感
+        // this.tree.tilePositionX = this.player.x
+        // this.tree.tilePositionY = this.player.y
 
 
     /*=== keyDown ===*/

@@ -21,6 +21,8 @@ class createEnemy extends Phaser.Physics.Arcade.Sprite {
         // this.body.setCollideWorldBounds(true);
         this.body.setBounce(1)
 
+        console.log(this)
+
         this.health = data.enemy.health;
         this.hurtBySword = false;
     }
@@ -103,15 +105,15 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         var y = this.spiralRadius * Math.sin(this.spiralRotation);
         
         this.angle += 12
-        this.hasDamage = ( (~~this.scene.sys.game.loop.frame) % data.weapon.sword.damagePerFrame === 0 ) ? true : false;
+        this.hasDamage = ( (~~this.scene.sys.game.loop.frame) % data.weapon.sword.damageFPS === 0 ) ? true : false;
     }
 }
 
 
 class createHurtText extends Phaser.GameObjects.Text {
     constructor( scene, x, y, text ){
-        let style = { color: 'red' }
-        super( scene, ~~x, ~~y, text, style );
+        let style = { color: 'red', fontFamily: '微軟正黑體', }
+        super( scene, x, y, text, style );
         this.scene = scene;
         scene.hurtTexts.add(this);
         scene.add.existing(this);
