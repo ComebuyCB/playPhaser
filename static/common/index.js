@@ -5,6 +5,7 @@ const gamePlay = {
         this.load.image('tree','static/img/tree.png' )
         this.load.image('border','static/img/border.png' )
         this.load.spritesheet('personImg', 'static/img/player2.png', { frameWidth: 47, frameHeight: 71, } )
+        this.load.spritesheet('expImg', 'static/img/exp.png', { frameWidth: 192, frameHeight: 192, } )
         this.load.spritesheet('fireballImg', 'static/img/fireball.png', { frameWidth: 512, frameHeight: 512, } )
         this.load.image('swordImg', 'static/img/sword.png')
     },
@@ -39,6 +40,17 @@ const gamePlay = {
             });
         }
 
+        this.anims.create({
+            key: 'fireballAni', frameRate: 8, repeat: -1,
+            frames: This.anims.generateFrameNumbers('fireballImg', { start: 0, end: 5, }),
+        })
+
+        this.anims.create({
+            key: 'expAni', frameRate: 8, repeat: -1,
+            frames: This.anims.generateFrameNumbers('expImg', { start: 10, end: 12, }),
+        })
+
+
 
     /*=== player ===*/
         this.player = this.physics.add.sprite(cw/2, ch/2, 'person')
@@ -59,14 +71,11 @@ const gamePlay = {
         this.enemies = this.physics.add.group();
         createPlayerAnim({key: 'enemy', row: 0, col: 0, })
 
+        this.exps = this.physics.add.group();
+
     /*=== weapons ===*/
         this.weapon = [];
         this.weapon.fireballs = this.physics.add.group();
-
-        this.anims.create({
-            key: 'fireballAni', frameRate: 8, repeat: -1,
-            frames: This.anims.generateFrameNumbers('fireballImg', { start: 0, end: 5, }),
-        })
 
         this.weapon.swords = this.physics.add.group();
 
@@ -74,15 +83,16 @@ const gamePlay = {
     /*=== create objects per time ===*/
         this.hurtTexts = this.add.group();
         this.enemyTime = this.time.addEvent({ 
-            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.enemy.spawnFPS, 
+            delay: data.enemy.spawnCD * 1000, 
             repeat: -1,
             callback: () => {
                 new createEnemy(this)
             }
         })
 
-        this.weapon.fireballTime = this.time.addEvent({ 
-            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.weapon.fireball.spawnFPS, 
+        
+        this.weapon.fireballSpawnTime = this.time.addEvent({ 
+            delay: data.weapon.fireball.spawnCD * 1000, 
             repeat: -1, 
             callback: () => {
                 if ( data.weapon.fireball.active ){
@@ -112,8 +122,8 @@ const gamePlay = {
             }
         })
 
-        this.weapon.swordTime = this.time.addEvent({ 
-            delay: ~~(1000 / This.sys.game.loop.targetFps) * data.weapon.sword.spawnFPS, 
+        this.weapon.swordSpawnTime = this.time.addEvent({ 
+            delay: data.weapon.sword.spawnCD * 1000, 
             repeat: -1, 
             callback: () => {
                 if ( data.weapon.sword.active ){
@@ -128,20 +138,21 @@ const gamePlay = {
         this.physics.add.collider(this.enemies, this.weapon.fireballs, function( enemy, fireball ){
             enemy.health -= fireball.damage;
             new createHurtText(This, enemy.x, enemy.y, -fireball.damage)
-            if ( enemy.health <= 0 ){
-                enemy.destroy();
-            }
             fireball.destroy();
         })
 
         this.physics.add.overlap(this.enemies, this.weapon.swords, function( enemy, sword ){
-            if ( sword.hasDamage == true ){
+            if ( enemy.hurtBySwordLastTime === undefined || sword.damageCD( enemy.hurtBySwordLastTime ) < 0 ){
                 enemy.health -= sword.damage;
+                enemy.hurtBySwordLastTime = This.sys.game.loop.time;
                 new createHurtText(This, enemy.x, enemy.y, -sword.damage)
-                if ( enemy.health <= 0 ){
-                    enemy.destroy();
-                }
             }
+        })
+
+        this.physics.add.overlap(this.player, this.exps, function( player, exp ){
+            // player.exp += 1;
+            data.player.exp += 1
+            exp.destroy();
         })
 
         this.physics.add.collider(this.enemies, this.enemies)
@@ -260,9 +271,15 @@ const gamePlay = {
             this.hurtTexts.getChildren()[i].update()
         }
 
+        for( let i=0; i<this.exps.getChildren().length; i++ ){
+            this.exps.getChildren()[i].update()
+        }
+
         for( let [key, val] of Object.entries( keyDown ) ){
             preKeyDown[key] = val
         }
+
+        $('#time').text( ~~This.sys.game.loop.time )
     },
 }
 
@@ -281,6 +298,9 @@ const game = new Phaser.Game({
         },
     },
     useTicker: true,
+    contextCreation: {
+        willReadFrequently: true,
+    },
     scene: [
         // gameStart,
         gamePlay,

@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>try</title>
 
-    <script src="static/plugin/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 
     <link src="static/plugin/dat.gui-0.7.9/build/dat.gui.css" rel="stylesheet">
     <script src="static/plugin/dat.gui-0.7.9/build/dat.gui.js"></script>
@@ -13,7 +14,13 @@
     <link href="static/common/main.css" rel="stylesheet">
 </head>
 <body>
-    <div id="app"></div>
+    <div>
+        <div id="app"></div>
+        <div style="display: flex; justify-content: space-between;">
+            <div>方向鍵：W/A/S/D</div>
+            <div id="time"></div>
+        </div>
+    </div>
 
     <script src="static/common/const.js"></script>
     <script src="static/common/object.js"></script>
