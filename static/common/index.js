@@ -41,7 +41,6 @@ const gamePlay = {
         const borderThick = {x:72, y:48,}
         this.border = this.add.sprite(cw/2, ch/2, 'border')
         this.border.setDisplaySize(bw + borderThick.x, bh + borderThick.y)
-        // this.add.image(400, 300, 'tree').setInteractive(GameConstants.cursors.hover);
 
 
     /*=== animations ===*/
@@ -65,7 +64,7 @@ const gamePlay = {
         this.player.setOffset(12,10)
         this.player.setCollideWorldBounds(true)
         this.player.setBounce(1)
-        this.player.anims.play('player1-down', true)
+        this.player.anims.play('player1-right', true)
         this.player.hurtTime = 0;
         this.myCam = this.cameras.main.startFollow(this.player)
         
@@ -135,13 +134,15 @@ const gamePlay = {
     /*=== collider / overlap ===*/
         this.physics.add.collider(this.enemies, this.weapon.fireballs, (enemy, fireball) => {
             enemy.health -= fireball.damage;
+            data.totalDamge.fireball += fireball.damage;
             new createHurtText(this, enemy.x, enemy.y, -fireball.damage, { color: '#c00', })
-            fireball.destroy();
+            fireball.destroy()
         })
         this.physics.add.overlap(this.enemies, this.weapon.iceballs, (enemy, iceball) => {
             if ( enemy.hurtByIceBall === undefined || enemy.hurtByIceBall !== iceball.id ){
                 enemy.hurtByIceBall = iceball.id;
                 enemy.health -= iceball.damage;
+                data.totalDamge.iceball += iceball.damage;
                 iceball.penetrate -= 1;
                 new createHurtText(this, enemy.x, enemy.y, -iceball.damage, { color: '#059', })
             }
@@ -150,6 +151,7 @@ const gamePlay = {
             if ( enemy.hurtBySwordLastTime === undefined || sword.damageCD( enemy.hurtBySwordLastTime ) < 0 ){
                 enemy.hurtBySwordLastTime = this.sys.game.loop.time;
                 enemy.health -= sword.damage;
+                data.totalDamge.sword += sword.damage;
                 new createHurtText(this, enemy.x, enemy.y, -sword.damage, { color: '#0af', } )
             }
         })
@@ -172,6 +174,8 @@ const gamePlay = {
     },
     update(){
         const This = this
+
+        $('#totalDamage').html( JSON.stringify(data.totalDamge).replace(/[\"\{\}]/g,'').split(',').join('<br>') )
         
         /*=== debug ===*/
         if (this.toggleDebug === true) {

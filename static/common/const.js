@@ -21,6 +21,11 @@ const destroyGroup = ( group ) =>{
 let data = {
     debug: false,
     pause: false,
+    totalDamge: {
+        iceball: 0,
+        fireball: 0,
+        sword: 0,
+    },
     world: {
         bounce: {
             x: 0 - cw / 2, 
@@ -40,8 +45,8 @@ let data = {
     },
     enemy: {
         active: true,
-        health: 20,
-        spawnCD: 0.7,
+        health: 30,
+        spawnCD: 0.5,
         damage: 2,
         damageCD: 0.6,
         moveSpeed: 50,
@@ -60,10 +65,10 @@ let data = {
     weapon: {
         iceball: {
             active: true,
-            damage: 4,
+            damage: 7,
             spawnCD: 0.3,
             speed: 150,
-            penetrate: 3,
+            penetrate: 2,
             clear: function(){
                 let grp = game.scene.keys.gamePlay.weapon.iceballs
                 destroyGroup( grp )
@@ -71,10 +76,9 @@ let data = {
         },
         fireball: {
             active: true,
-            damage: 5,
-            spawnCD: 0.6,
-            maxAmount: 100,
-            boundAmount: 2,
+            damage: 10,
+            spawnCD: 0.55,
+            maxAmount: 200,
             speed: 250,
             clear: function(){
                 let grp = game.scene.keys.gamePlay.weapon.fireballs
@@ -168,7 +172,6 @@ let gui_fireball = gui_weapon.addFolder('Fireball');
         scene.weapon.fireballSpawnTime.delay = val * 1000
     })
     gui_fireball.add(data.weapon.fireball, 'maxAmount').min(1).max(1000).step(1);
-    gui_fireball.add(data.weapon.fireball, 'boundAmount').min(0).max(10).step(1);
     gui_fireball.add(data.weapon.fireball, 'speed').min(1).max(1000).step(1);
     gui_fireball.add(data.weapon.fireball, 'clear');
     gui_fireball.open();

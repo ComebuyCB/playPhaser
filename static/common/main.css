@@ -27,3 +27,9 @@ body {
     --percent: 0%;
     background: linear-gradient(to right, lime 0%, lime var(--percent), lightgray var(--percent), lightgray 100%);
 }
+
+#totalDamage {
+    position: absolute;
+    right: 10px;
+    top: 10px
+}
