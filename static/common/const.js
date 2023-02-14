@@ -7,6 +7,16 @@ const preKeyDown = {
     up: false,
     new: null,
 }
+const worldMouse = {
+    x: cw + 10,
+    y: cw + 10,
+}
+
+const destroyGroup = ( group ) =>{
+    for( let i=group.getChildren().length-1; i>=0; i-- ){
+        group.getChildren()[i].destroy()
+    }
+}
 
 let data = {
     debug: false,
@@ -19,38 +29,47 @@ let data = {
             height: ch * 2,
         }
     },
-    enemy: {
-        health: 20,
-        spawnCD: 0.7,
-        damage: 2,
-        moveSpeed: 50,
-        clear: function(){
-            let scene = game.scene.keys.gamePlay
-            for( let i=scene.enemies.getChildren().length - 1; i>=0; i-- ){
-                scene.enemies.getChildren()[i].destroy()
-            }
-        }
-    },
     player: {
-        health: 50,
+        health: 500,
         level: 1,
         exp: 0,
         expToNextLevel: 100,
         moveSpeed: 150,
     },
+    enemy: {
+        active: true,
+        health: 20,
+        spawnCD: 0.7,
+        damage: 2,
+        moveSpeed: 50,
+        clear: function(){
+            let grp = game.scene.keys.gamePlay.enemies
+            destroyGroup( grp )
+        }
+    },
+    exp: {
+        active: true,
+        clear: function(){
+            let grp = game.scene.keys.gamePlay.exps
+            destroyGroup( grp )
+        }
+    },
     weapon: {
+        iceball: {
+            active: true,
+            spawnCD: 0.3,
+            speed: 150,
+        },
         fireball: {
             active: true,
             damage: 5,
-            spawnCD: 0.3,
+            spawnCD: 0.6,
             maxAmount: 100,
             boundAmount: 2,
             speed: 250,
             clear: function(){
-                let scene = game.scene.keys.gamePlay
-                for( let i=scene.weapon.fireballs.getChildren().length - 1; i>=0; i-- ){
-                    scene.weapon.fireballs.getChildren()[i].destroy()
-                }
+                let grp = game.scene.keys.gamePlay.weapon.fireballs
+                destroyGroup( grp )
             }
         },
         sword: {
@@ -61,10 +80,8 @@ let data = {
             maxAmount: 20,
             // speed: 150,
             clear: function(){
-                let scene = game.scene.keys.gamePlay
-                for( let i=scene.weapon.swords.getChildren().length - 1; i>=0; i-- ){
-                    scene.weapon.swords.getChildren()[i].destroy()
-                }
+                let grp = game.scene.keys.gamePlay.weapon.swords
+                destroyGroup( grp )
             }
         },
     },
@@ -84,7 +101,14 @@ gui.add(data, 'pause').onChange((val)=>{
     }
 })
 
+let gui_player = gui.addFolder('Player');
+    gui_player.add(data.player, 'health').min(1).max(1000).step(1).listen();
+    gui_player.add(data.player, 'exp').min(0).max(500).step(1).listen();
+    gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
+    gui_player.open();
+
 let gui_enemy = gui.addFolder('Enemy');
+    gui_enemy.add(data.enemy, 'active');
     gui_enemy.add(data.enemy, 'health').min(1).max(1000).step(1).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         for( let i=0; i<scene.enemies.getChildren().length; i++ ){
@@ -93,9 +117,8 @@ let gui_enemy = gui.addFolder('Enemy');
     })
     gui_enemy.add(data.enemy, 'spawnCD').min(0.01).max(2).step(0.01).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
-        scene.enemyTime.delay = val
+        scene.enemyTime.delay = val * 1000
     })
-    
     gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         for( let i=0; i<scene.enemies.getChildren().length; i++ ){
@@ -106,14 +129,22 @@ let gui_enemy = gui.addFolder('Enemy');
     gui_enemy.add(data.enemy, 'clear');
     gui_enemy.open();
 
-let gui_player = gui.addFolder('Player');
-    gui_player.add(data.player, 'health').min(1).max(1000).step(1);
-    gui_player.add(data.player, 'exp').min(0).max(500).step(1).listen();
-    gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
-    gui_player.open();
+let gui_exp = gui.addFolder('Exp');
+    gui_exp.add(data.exp, 'active');
+    gui_exp.add(data.exp, 'clear');
+    gui_exp.open();
 
 let gui_weapon = gui.addFolder('Weapon');
     gui_weapon.open();
+
+let gui_iceball = gui_weapon.addFolder('Iceball');
+    gui_iceball.add(data.weapon.iceball, 'active');
+    gui_iceball.add(data.weapon.iceball, 'spawnCD').min(0.01).max(2).step(0.01).onChange((val)=>{
+        let scene = game.scene.keys.gamePlay
+        scene.weapon.iceballSpawnTime.delay = val * 1000
+    })
+    gui_iceball.add(data.weapon.iceball, 'speed').min(1).max(1000).step(1);
+    gui_iceball.open();
 
 let gui_fireball = gui_weapon.addFolder('Fireball');
     gui_fireball.add(data.weapon.fireball, 'active');
@@ -123,7 +154,7 @@ let gui_fireball = gui_weapon.addFolder('Fireball');
         scene.weapon.fireballSpawnTime.delay = val * 1000
     })
     gui_fireball.add(data.weapon.fireball, 'maxAmount').min(1).max(1000).step(1);
-    gui_fireball.add(data.weapon.fireball, 'boundAmount').min(1).max(100).step(1);
+    gui_fireball.add(data.weapon.fireball, 'boundAmount').min(0).max(10).step(1);
     gui_fireball.add(data.weapon.fireball, 'speed').min(1).max(1000).step(1);
     gui_fireball.add(data.weapon.fireball, 'clear');
     gui_fireball.open();

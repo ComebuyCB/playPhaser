@@ -1,0 +1,19 @@
+{ 
+    "tree": [
+        {
+            "density": 2, "friction": 0, "bounce": 0, 
+            "filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [   153, 190  ,  73, 217  ,  1, 208  ,  75, 5  ]
+        } ,
+        {
+            "density": 2, "friction": 0, "bounce": 0, 
+            "filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [   71, 250  ,  73, 217  ,  90, 221  ,  92, 250  ]
+        } ,
+        {
+            "density": 2, "friction": 0, "bounce": 0, 
+            "filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [   90, 221  ,  73, 217  ,  153, 190  ]
+        }
+    ]
+}
