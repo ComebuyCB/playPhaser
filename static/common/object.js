@@ -6,11 +6,9 @@ class createEnemy extends Phaser.Physics.Arcade.Sprite {
         let SY = Math.floor(scene.player.y) + ((ry ? 0.5 : -0.5) * ch)
         super( scene, SX, SY, 'enemy' );
         this.scene = scene;
-        this.active = 
         this.moveSpeed = data.enemy.moveSpeed;
         this.health = data.enemy.health;
         this.damage = data.enemy.damage;
-        this.hurtBySword = false;
 
         scene.enemies.add(this);
         this.init();
@@ -39,8 +37,42 @@ class createEnemy extends Phaser.Physics.Arcade.Sprite {
             this.destroy();
         }
     }
+    damageCD( lastTime ){
+        return data.enemy.damageCD * 1000 - (this.scene.sys.game.loop.time - lastTime)
+    }
 }
 
+
+class createIceBall extends Phaser.Physics.Arcade.Sprite {
+    constructor( scene ){
+        let {px,py,x,y} = scene.mouseArrow.getChildren()[0];
+        super( scene, x, y, 'weaponImg' );
+        this.scene = scene;
+        this.vx = -px;
+        this.vy = -py;
+        this.damage = data.weapon.iceball.damage;
+        this.penetrate = data.weapon.iceball.penetrate;
+        this.id = ~~scene.sys.game.loop.time
+        scene.weapon.iceballs.add(this);
+        this.init();
+    }
+    init(){
+        this.setScale(0.6);
+        this.body.setSize(80,35);
+        this.body.setOffset(20,10);
+        this.body.velocity.x = this.vx * data.weapon.iceball.speed * 0.1;
+        this.body.velocity.y = this.vy * data.weapon.iceball.speed * 0.1;
+        this.anims.play('iceballAni', true)
+        this.angle = Math.atan2(this.vy, this.vx) * 180 / Math.PI
+        this.scene.add.existing(this);
+    }
+    update(){
+        if ( this.body.checkWorldBounds() || this.penetrate <= 0 ){
+            this.destroy();
+        }
+
+    }
+}
 
 
 class createFireBall extends Phaser.Physics.Arcade.Sprite {
@@ -73,7 +105,6 @@ class createFireBall extends Phaser.Physics.Arcade.Sprite {
         let vy = this.body.velocity.y
         this.angle = Math.atan2(vy, vx) * 180 / Math.PI
         if ( this.body.checkWorldBounds() ){
-            console.log( 'true' )
             this.boundAmount --
             if ( this.boundAmount <=0 ){
                 this.destroy()
@@ -94,7 +125,7 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         this.spiralSpeed = 0;
         this.spiralSpeedInc = 0.05;
         this.damage = data.weapon.sword.damage;
-
+        
         scene.weapon.swords.add(this);
         this.init();
     }
@@ -114,17 +145,17 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         this.y = this.scene.player.y + this.spiralRadius * Math.sin(this.spiralSpeed);
         this.angle += 30
 
-        if ( Math.abs(this.x - this.scene.player.x) > cw + 100 || 
-            Math.abs(this.y - this.scene.player.y) > ch + 100 ){
-            this.destroy()
+        if ( this.body.checkWorldBounds() ){
+            this.destroy();
         }
     }
 }
 
 
 class createHurtText extends Phaser.GameObjects.Text {
-    constructor( scene, x, y, text ){
-        let style = { color: '#cc0000', fontFamily: '微軟正黑體', }
+    constructor( scene, x, y, text, styleOpt={} ){
+        let style = { color: '#cc0000', fontFamily: '微軟正黑體', strokeThickness: 1, }
+        Object.assign( style, styleOpt );
         super( scene, x, y, text, style );
         this.scene = scene;
         this.startTime = scene.sys.game.loop.time;
@@ -174,6 +205,20 @@ class createExp extends Phaser.Physics.Arcade.Sprite {
             }
         }
     }
+    addExpToData( num = 1 ){
+        let pExp = data.player.exp
+        this.destroy();
+        pExp.expNow += num;
+        if ( pExp.expNow >= pExp.expToNextLevel ){
+            pExp.expNow -= pExp.expToNextLevel;
+            pExp.expToNextLevel += 10;
+            pExp.level += 1;
+        }
+        $('#lv').text(pExp.level);
+        $('#exp').text(pExp.expNow);
+        $('#expBar').css('--percent', pExp.expNow / pExp.expToNextLevel * 100 + '%');
+        $('#maxExp').text(pExp.expToNextLevel);
+    }
 }
 
 
@@ -202,36 +247,6 @@ class createMouseArrow extends Phaser.Physics.Arcade.Sprite {
             this.x = player.x - this.px
             this.y = player.y - this.py
             this.angle = Math.atan2( peX, peY ) * -180 / Math.PI
-        }
-    }
-}
-
-
-class createIceBall extends Phaser.Physics.Arcade.Sprite {
-    constructor( scene ){
-        let {px,py,x,y} = scene.mouseArrow.getChildren()[0];
-        super( scene, x, y, 'weaponImg' );
-        this.scene = scene;
-        this.vx = -px
-        this.vy = -py
-        this.damage = data.weapon.fireball.damage;
-        scene.weapon.iceballs.add(this);
-        this.init();
-    }
-    init(){
-        this.setScale(0.6);
-        this.body.setSize(80,35);
-        this.body.setOffset(20,10);
-        this.body.velocity.x = this.vx * data.weapon.iceball.speed * 0.1;
-        this.body.velocity.y = this.vy * data.weapon.iceball.speed * 0.1;
-        this.body.setCollideWorldBounds(true);
-        this.anims.play('iceballAni', true)
-        this.angle = Math.atan2(this.vy, this.vx) * 180 / Math.PI
-        this.scene.add.existing(this);
-    }
-    update(){
-        if ( this.body.checkWorldBounds() ){
-            this.destroy()
         }
     }
 }

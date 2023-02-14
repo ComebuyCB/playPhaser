@@ -31,16 +31,19 @@ let data = {
     },
     player: {
         health: 500,
-        level: 1,
-        exp: 0,
-        expToNextLevel: 100,
         moveSpeed: 150,
+        exp: {
+            level: 1,
+            expNow: 0,
+            expToNextLevel: 10,
+        },
     },
     enemy: {
         active: true,
         health: 20,
         spawnCD: 0.7,
         damage: 2,
+        damageCD: 0.6,
         moveSpeed: 50,
         clear: function(){
             let grp = game.scene.keys.gamePlay.enemies
@@ -57,8 +60,14 @@ let data = {
     weapon: {
         iceball: {
             active: true,
+            damage: 4,
             spawnCD: 0.3,
             speed: 150,
+            penetrate: 3,
+            clear: function(){
+                let grp = game.scene.keys.gamePlay.weapon.iceballs
+                destroyGroup( grp )
+            }
         },
         fireball: {
             active: true,
@@ -88,6 +97,7 @@ let data = {
 }
 
 const gui = new dat.gui.GUI();
+
 gui.add(data, 'debug').onChange((val)=>{
     let scene = game.scene.keys.gamePlay
     scene.toggleDebug = true
@@ -103,9 +113,13 @@ gui.add(data, 'pause').onChange((val)=>{
 
 let gui_player = gui.addFolder('Player');
     gui_player.add(data.player, 'health').min(1).max(1000).step(1).listen();
-    gui_player.add(data.player, 'exp').min(0).max(500).step(1).listen();
     gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
     gui_player.open();
+    
+let gui_exp = gui_player.addFolder('Exp');
+    gui_exp.add(data.exp, 'active');
+    gui_exp.add(data.exp, 'clear');
+    gui_exp.open();
 
 let gui_enemy = gui.addFolder('Enemy');
     gui_enemy.add(data.enemy, 'active');
@@ -129,21 +143,21 @@ let gui_enemy = gui.addFolder('Enemy');
     gui_enemy.add(data.enemy, 'clear');
     gui_enemy.open();
 
-let gui_exp = gui.addFolder('Exp');
-    gui_exp.add(data.exp, 'active');
-    gui_exp.add(data.exp, 'clear');
-    gui_exp.open();
 
-let gui_weapon = gui.addFolder('Weapon');
+const gui_w = new dat.gui.GUI();
+let gui_weapon = gui_w.addFolder('Weapon');
     gui_weapon.open();
 
 let gui_iceball = gui_weapon.addFolder('Iceball');
     gui_iceball.add(data.weapon.iceball, 'active');
+    gui_iceball.add(data.weapon.iceball, 'damage').min(1).max(100).step(1);
+    gui_iceball.add(data.weapon.iceball, 'penetrate').min(1).max(100).step(1);
     gui_iceball.add(data.weapon.iceball, 'spawnCD').min(0.01).max(2).step(0.01).onChange((val)=>{
         let scene = game.scene.keys.gamePlay
         scene.weapon.iceballSpawnTime.delay = val * 1000
     })
     gui_iceball.add(data.weapon.iceball, 'speed').min(1).max(1000).step(1);
+    gui_iceball.add(data.weapon.iceball, 'clear');
     gui_iceball.open();
 
 let gui_fireball = gui_weapon.addFolder('Fireball');
