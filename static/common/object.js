@@ -2,10 +2,11 @@ class createEnemy extends Phaser.Physics.Arcade.Sprite {
     constructor( scene ){
         let rx = ~~(Math.random()*2)
         let ry = ~~(Math.random()*2)
-        let SX = Math.floor(scene.player.x) + ((rx ? 0.5 : -0.5) * cw) + ~~( Math.random()*(cw/4) - (cw/8) )
-        let SY = Math.floor(scene.player.y) + ((ry ? 0.5*ch+30 : -0.5*ch-30) )
+        let SX = Math.floor(scene.player.x) + (rx ? 0.5*cw : -0.5*cw ) + ~~(Math.random()*400 - 200)
+        let SY = Math.floor(scene.player.y) + (ry ? 0.5*ch+30 : -0.5*ch-30)
         super( scene, SX, SY, 'enemy' );
         this.scene = scene;
+        this.id = 'enemy' + scene.sys.game.loop.time;
         this.moveSpeed = data.enemy.moveSpeed;
         this.health = data.enemy.health;
         this.damage = data.enemy.damage;
@@ -114,7 +115,7 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         this.scene = scene;
         this.spiralRadius = ~~(Math.random()*100 - 50);
         this.spiralRadiusInc = 0.8;
-        this.spiralSpeed = 0;
+        this.spiralSpeed = ~~(Math.random()*0.2 - 0.1);
         this.spiralSpeedInc = 0.05;
         this.damage = data.weapon.sword.damage;
         
@@ -122,7 +123,7 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         this.init();
     }
     init(){
-        this.setScale(0.05);
+        this.setScale(0.001 * data.weapon.sword.size);
         this.body.setCircle(2000*0.5);
         this.body.setBounce(1);
         this.scene.add.existing(this);
@@ -131,10 +132,10 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
         return data.weapon.sword.damageCD * 1000 - (this.scene.sys.game.loop.time - lastTime)
     }
     update(){
-        this.spiralRadius += this.spiralRadiusInc + ~~(Math.random()*2);
+        this.spiralRadius += this.spiralRadiusInc;
         this.spiralSpeed += this.spiralSpeedInc;
-        this.x = this.scene.player.x + this.spiralRadius * Math.cos(this.spiralSpeed);
-        this.y = this.scene.player.y + this.spiralRadius * Math.sin(this.spiralSpeed);
+        this.x = this.scene.player.x + this.spiralRadius * Math.cos(this.spiralSpeed) + ~~(Math.random() * 10 - 5);
+        this.y = this.scene.player.y + this.spiralRadius * Math.sin(this.spiralSpeed) + ~~(Math.random() * 10 - 5);
         this.angle += 30
 
         if ( this.body.checkWorldBounds() ){
@@ -146,7 +147,7 @@ class createSword extends Phaser.Physics.Arcade.Sprite {
 
 class createHurtText extends Phaser.GameObjects.Text {
     constructor( scene, x, y, text, styleOpt={} ){
-        let style = { color: '#cc0000', fontFamily: '微軟正黑體', strokeThickness: 2, }
+        let style = { color: '#cc0000', fontFamily: '微軟正黑體', strokeThickness: 2, fontSize: 15, }
         Object.assign( style, styleOpt );
         super( scene, x, y, text, style );
         this.scene = scene;
@@ -160,6 +161,7 @@ class createHurtText extends Phaser.GameObjects.Text {
         this.scene.add.existing(this);
     }
     update(){
+        this.y -= 0.1;
         if ( this.scene.sys.game.loop.time - this.startTime > this.destroyTime ){
             this.destroy()
         }
@@ -241,5 +243,58 @@ class createMouseArrow extends Phaser.Physics.Arcade.Sprite {
             this.y = player.y - this.py
             this.angle = Math.atan2( peX, peY ) * -180 / Math.PI
         }
+    }
+}
+
+
+class createBoom extends Phaser.Physics.Arcade.Sprite {
+    constructor( scene ){
+        let rdX = ~~(Math.random() * 300 - 150);
+        let rdY = ~~(Math.random() * 300 - 150);
+        let {x,y} = scene.player;
+        super( scene, x + rdX, y + rdY, 'boomImg' );
+        this.scene = scene;
+        this.damage = data.weapon.boom.damage;
+        this.damagedTargets = [];
+        
+        scene.weapon.booms.add(this);
+        this.init();
+    }
+    init(){
+        this.anims.play('boomAni', true);
+        this.setSize(130,98);
+        this.setOffset(0,5);
+        this.scene.add.existing(this);
+    }
+    update(){
+        if ( !this.anims.isPlaying ){
+            this.destroy();
+        }
+    }
+}
+
+
+class createBoomTimer {
+    constructor( scene ){
+        this.scene = scene;
+        if ( scene.boomTimer ){
+            scene.boomTimer.destroy()
+        }
+        this.init();
+    }
+    init(){
+        let This = this
+        this.scene.player.boomTime = this.scene.sys.game.loop.time;
+        this.scene.boomTimer = this.scene.time.addEvent({
+            repeat: -1,
+            delay: data.weapon.boom.spawnCD * 1000,
+            callback: () => {
+                if ( !data.weapon.boom.active ){ return false }
+                new createBoom(This.scene);
+                if ( This.scene.sys.game.loop.time > This.scene.player.boomTime + (data.weapon.boom.duration * 1000) ){
+                    this.scene.boomTimer.destroy();
+                }
+            }
+        })
     }
 }

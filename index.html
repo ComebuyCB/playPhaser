@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" value="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>try</title>
 
@@ -12,20 +13,47 @@
     <script src="static/plugin/dat.gui-0.7.9/build/dat.gui.js"></script>
 
     <link href="static/common/main.css" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; position: relative; }
+        html { padding: 0; margin: 0; font-family: '微軟正黑體'; font-weight: 900; }
+        body { max-width: 1400px; height: 100vh; display: flex; justify-content: center; align-items: center; }
+
+        .pos-7 { position: absolute; left: 0; top: 0; z-index: 1; }
+        .pos-8 { position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 1; }
+        .pos-9 { position: absolute; right: 0; top: 0; z-index: 1; }
+
+        .flex-ub { display: flex; justify-content: space-between; }
+        .flex-cb { display: flex; align-items: center; justify-content: space-between; }
+        .flex-cc { display: flex; align-items: center; justify-content: center; }
+
+        .p-2 { padding: 0.5rem; }
+
+        #expBar { margin-top: 8px; padding: 0 2px; font-weight: bold; width: 500px; border: 1px solid #aaa; --percent: 0%; background: linear-gradient(to right, lime 0%, lime var(--percent), lightgray var(--percent), lightgray 100%); }
+    </style>
 </head>
-<body>
+<body class="flex-cc">
     <div id="wrap">
+        <div class="flex-ub">
+            <div></div>
+            <div>目前經驗值沒用處~</div>
+            <div></div>
+        </div>
         <div id="app">
-            <div id="expBar" style="--percent: 0%">
+            <div class="pos-7 p-2">HP: <span id="hp"></span></div>
+            <div id="expBar" class="pos-8 flex-cb" style="--percent: 0%">
                 <div>LV <b id="lv">1</b></div>
                 <div>Exp: <b id="exp">0</b>/<b id="maxExp">0</b></div>
             </div>
-            <div id="totalDamage"></div>
+            <div id="totalDamage" class="pos-9 p-2"></div>
         </div>
-        <div style="display: flex; justify-content: space-between;">
-            <div>方向鍵: W/A/S/D</div>
-            <div>Ultimate: Space</div>
-            <div id="time"></div>
+        <div class="flex-ub">
+            <div>方向鍵: [W/A/S/D]</div>
+            <div style="text-align: center;">
+                Ultimate: [Space] <br>
+                CD: <span id="ultCD"></span>
+            </div>
+            <div>時間: <span id="time"></span></div>
         </div>
     </div>
 

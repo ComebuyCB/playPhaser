@@ -9,6 +9,7 @@ const gamePlay = {
         this.load.spritesheet('expImg', 'static/img/exp.png', { frameWidth: 192, frameHeight: 192, } )
         this.load.spritesheet('fireballImg', 'static/img/fireball.png', { frameWidth: 512, frameHeight: 512, } )
         this.load.spritesheet('weaponsImg', 'static/img/balls.png', { frameWidth: 99, frameHeight: 47, } )
+        this.load.spritesheet('boomImg', 'static/img/weapons.png', { frameWidth: 130, frameHeight: 108, } )
         this.load.image('swordImg', 'static/img/sword.png')
     },
     create(){
@@ -26,6 +27,7 @@ const gamePlay = {
         this.weapon.fireballs = this.physics.add.group();
         this.weapon.iceballs = this.physics.add.group();
         this.weapon.swords = this.physics.add.group();
+        this.weapon.booms = this.physics.add.group();
         this.hurtTexts = this.add.group();
 
 
@@ -55,6 +57,7 @@ const gamePlay = {
         this.anims.create({key: 'fireballAni', frameRate: 8, repeat: -1, frames: This.anims.generateFrameNumbers('fireballImg', { start: 0, end: 5, }), })
         this.anims.create({key: 'iceballAni', frameRate: 8, repeat: -1, frames: This.anims.generateFrameNumbers('weaponsImg', { start: 13, end: 20, }), })
         this.anims.create({key: 'expAni', frameRate: 8, repeat: -1, frames: This.anims.generateFrameNumbers('expImg', { start: 10, end: 12, }), })
+        this.anims.create({key: 'boomAni', frameRate: 30, repeat: 0, hideOnComplete: true, frames: This.anims.generateFrameNumbers('boomImg', { start: 13, end: 31, }), })
         
 
     /*=== player ===*/
@@ -64,11 +67,10 @@ const gamePlay = {
         this.player.setOffset(12,10)
         this.player.setCollideWorldBounds(true)
         this.player.setBounce(1)
-        this.player.anims.play('player1-right', true)
+        this.player.anims.play('player1-right', true);
         this.player.hurtTime = 0;
-        this.myCam = this.cameras.main.startFollow(this.player)
-        
-        
+        this.myCam = this.cameras.main.startFollow(this.player);
+
     /*=== mouseArrow ===*/
         new createMouseArrow(this)
 
@@ -134,7 +136,7 @@ const gamePlay = {
     /*=== collider / overlap ===*/
         this.physics.add.collider(this.enemies, this.weapon.fireballs, (enemy, fireball) => {
             enemy.health -= fireball.damage;
-            data.totalDamge.fireball += fireball.damage;
+            data.totalDamage.fireball += fireball.damage;
             new createHurtText(this, enemy.x, enemy.y, -fireball.damage, { color: '#c00', })
             fireball.destroy()
         })
@@ -142,7 +144,7 @@ const gamePlay = {
             if ( enemy.hurtByIceBall === undefined || enemy.hurtByIceBall !== iceball.id ){
                 enemy.hurtByIceBall = iceball.id;
                 enemy.health -= iceball.damage;
-                data.totalDamge.iceball += iceball.damage;
+                data.totalDamage.iceball += iceball.damage;
                 iceball.penetrate -= 1;
                 new createHurtText(this, enemy.x, enemy.y, -iceball.damage, { color: '#059', })
             }
@@ -151,9 +153,16 @@ const gamePlay = {
             if ( enemy.hurtBySwordLastTime === undefined || sword.damageCD( enemy.hurtBySwordLastTime ) < 0 ){
                 enemy.hurtBySwordLastTime = this.sys.game.loop.time;
                 enemy.health -= sword.damage;
-                data.totalDamge.sword += sword.damage;
-                new createHurtText(this, enemy.x, enemy.y, -sword.damage, { color: '#0af', } )
+                data.totalDamage.sword += sword.damage;
+                new createHurtText(this, enemy.x, enemy.y, -sword.damage, { color: '#0af', })
             }
+        })
+        this.physics.add.overlap(this.enemies, this.weapon.booms, (enemy, boom)=>{
+            if ( boom.damagedTargets.includes( enemy.id ) ){ return false }
+            boom.damagedTargets.push( enemy.id );
+            enemy.health -= boom.damage;
+            data.totalDamage.boom += boom.damage;
+            new createHurtText(this, enemy.x, enemy.y, -boom.damage, { color: '#f00', fontSize: 20, });
         })
         this.physics.add.overlap(this.player, this.exps, (player, exp)=>{
             // this.player.exp += 1;
@@ -174,8 +183,6 @@ const gamePlay = {
     },
     update(){
         const This = this
-
-        $('#totalDamage').html( JSON.stringify(data.totalDamge).replace(/[\"\{\}]/g,'').split(',').join('<br>') )
         
         /*=== debug ===*/
         if (this.toggleDebug === true) {
@@ -201,8 +208,9 @@ const gamePlay = {
 
 
     /*=== keyDown ===*/
-        const keyCode = this.input.keyboard.addKeys("W,A,S,D")
+        const keyCode = this.input.keyboard.addKeys("W,A,S,D,SPACE")
         const keyDown = {
+            space: keyCode.SPACE.isDown,
             down: keyCode.S.isDown,
             left: keyCode.A.isDown,
             right: keyCode.D.isDown,
@@ -261,6 +269,15 @@ const gamePlay = {
             break
         }
 
+        if ( keyDown.space ){
+            if ( this.player.boomTime === undefined ){
+                this.player.boomTime = 0;
+            }
+            if ( this.player.boomTime + (data.weapon.boom.CD * 1000) < this.sys.game.loop.time ){
+                new createBoomTimer(this);
+            }
+        }
+
     /*=== update player ===*/
         this.player.alpha = ( this.player.hurtTime + 500 > this.sys.game.loop.time ) ? 0.5 : 1;
 
@@ -283,6 +300,7 @@ const gamePlay = {
         groupUpdate( this.weapon.fireballs )
         groupUpdate( this.weapon.iceballs )
         groupUpdate( this.weapon.swords )
+        groupUpdate( this.weapon.booms )
         groupUpdate( this.hurtTexts )
         groupUpdate( this.exps )
 
@@ -293,6 +311,11 @@ const gamePlay = {
         $('#exp').text(data.player.exp.expNow)
         $('#maxExp').text(data.player.exp.expToNextLevel)
         $('#time').text( ~~This.sys.game.loop.time )
+        $('#totalDamage').html( JSON.stringify(data.totalDamage).replace(/[\"\{\}]/g,'').split(',').join('<br>') )
+
+        let t = ~~((This.player.boomTime ? This.player.boomTime : 0) + (data.weapon.boom.CD * 1000) - This.sys.game.loop.time )
+        $('#ultCD').text( (t > 0) ? t : 'Ready' )
+        $('#hp').text( data.player.health )
     },
 }
 

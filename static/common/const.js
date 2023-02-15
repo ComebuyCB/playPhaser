@@ -21,10 +21,11 @@ const destroyGroup = ( group ) =>{
 let data = {
     debug: false,
     pause: false,
-    totalDamge: {
+    totalDamage: {
         iceball: 0,
         fireball: 0,
         sword: 0,
+        boom: 0,
     },
     world: {
         bounce: {
@@ -66,7 +67,7 @@ let data = {
         iceball: {
             active: true,
             damage: 7,
-            spawnCD: 0.3,
+            spawnCD: 0.4,
             speed: 150,
             penetrate: 2,
             clear: function(){
@@ -89,63 +90,23 @@ let data = {
             active: true,
             damage: 3,
             damageCD: 0.6,
-            spawnCD: 0.8,
-            maxAmount: 20,
-            // speed: 150,
+            spawnCD: 1.3,
+            maxAmount: 10,
+            size: 40,
             clear: function(){
                 let grp = game.scene.keys.gamePlay.weapon.swords
                 destroyGroup( grp )
             }
         },
+        boom: {
+            active: true,
+            damage: 100,
+            CD: 20,
+            spawnCD: 0.06,
+            duration: 8,
+        }
     },
 }
-
-const gui = new dat.gui.GUI();
-
-gui.add(data, 'debug').onChange((val)=>{
-    let scene = game.scene.keys.gamePlay
-    scene.toggleDebug = true
-})
-gui.add(data, 'pause').onChange((val)=>{
-    let scene = game.scene
-    if ( val ){
-        scene.pause('gamePlay')
-    } else {
-        scene.resume('gamePlay')
-    }
-})
-
-let gui_player = gui.addFolder('Player');
-    gui_player.add(data.player, 'health').min(1).max(1000).step(1).listen();
-    gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
-    gui_player.open();
-    
-let gui_exp = gui_player.addFolder('Exp');
-    gui_exp.add(data.exp, 'active');
-    gui_exp.add(data.exp, 'clear');
-    gui_exp.open();
-
-let gui_enemy = gui.addFolder('Enemy');
-    gui_enemy.add(data.enemy, 'active');
-    gui_enemy.add(data.enemy, 'health').min(1).max(1000).step(1).onChange((val)=>{
-        let scene = game.scene.keys.gamePlay
-        for( let i=0; i<scene.enemies.getChildren().length; i++ ){
-            scene.enemies.getChildren()[i].health = val
-        }
-    })
-    gui_enemy.add(data.enemy, 'spawnCD').min(0.01).max(2).step(0.01).onChange((val)=>{
-        let scene = game.scene.keys.gamePlay
-        scene.enemyTime.delay = val * 1000
-    })
-    gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1).onChange((val)=>{
-        let scene = game.scene.keys.gamePlay
-        for( let i=0; i<scene.enemies.getChildren().length; i++ ){
-            scene.enemies.getChildren()[i].moveSpeed = val
-        }
-    })
-    gui_enemy.add(data.enemy, 'damage').min(1).max(300).step(1);
-    gui_enemy.add(data.enemy, 'clear');
-    gui_enemy.open();
 
 
 const gui_w = new dat.gui.GUI();
@@ -185,6 +146,68 @@ let gui_sword = gui_weapon.addFolder('Sword');
         scene.weapon.swordSpawnTime.delay = val * 1000
     })
     gui_sword.add(data.weapon.sword, 'maxAmount').min(1).max(100).step(1);
-    // gui_sword.add(data.weapon.sword, 'speed').min(1).max(1000).step(1);
+    gui_sword.add(data.weapon.sword, 'size').min(1).max(200).step(1);
     gui_sword.add(data.weapon.sword, 'clear');
     gui_sword.open();
+
+
+let gui_boom = gui_weapon.addFolder('Boom');
+    gui_boom.add(data.weapon.boom, 'active');
+    gui_boom.add(data.weapon.boom, 'damage').min(1).max(1000).step(1);
+    gui_boom.add(data.weapon.boom, 'CD').min(1).max(180).step(1);
+    gui_boom.add(data.weapon.boom, 'spawnCD').min(0.01).max(1).step(0.01);
+    gui_boom.add(data.weapon.boom, 'duration').min(1).max(60).step(0.1);
+    gui_boom.open();
+
+
+const gui = new dat.gui.GUI();
+    gui.add(data, 'debug').onChange((val)=>{
+        let scene = game.scene.keys.gamePlay
+        scene.toggleDebug = true
+    })
+    gui.add(data, 'pause').onChange((val)=>{
+        let scene = game.scene
+        if ( val ){
+            scene.pause('gamePlay')
+        } else {
+            scene.resume('gamePlay')
+        }
+    })
+    
+    let gui_player = gui.addFolder('Player');
+        gui_player.add(data.player, 'health').min(1).max(1000).step(1).listen();
+        gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
+        gui_player.open();
+
+    let gui_lv = gui_player.addFolder('Level');
+        gui_lv.add(data.player.exp,'level').min(1).max(100).step(1).listen();
+        gui_lv.add(data.player.exp,'expNow').min(0).max(1000).step(1).listen();
+        gui_lv.add(data.player.exp,'expToNextLevel').min(1).max(1000).step(1).listen();
+        gui_lv.open();
+        
+    let gui_exp = gui_player.addFolder('Exp');
+        gui_exp.add(data.exp, 'active');
+        gui_exp.add(data.exp, 'clear');
+        gui_exp.open();
+    
+    let gui_enemy = gui.addFolder('Enemy');
+        gui_enemy.add(data.enemy, 'active');
+        gui_enemy.add(data.enemy, 'health').min(1).max(1000).step(1).onChange((val)=>{
+            let scene = game.scene.keys.gamePlay
+            for( let i=0; i<scene.enemies.getChildren().length; i++ ){
+                scene.enemies.getChildren()[i].health = val
+            }
+        })
+        gui_enemy.add(data.enemy, 'spawnCD').min(0.01).max(2).step(0.01).onChange((val)=>{
+            let scene = game.scene.keys.gamePlay
+            scene.enemyTime.delay = val * 1000
+        })
+        gui_enemy.add(data.enemy, 'moveSpeed').min(1).max(200).step(1).onChange((val)=>{
+            let scene = game.scene.keys.gamePlay
+            for( let i=0; i<scene.enemies.getChildren().length; i++ ){
+                scene.enemies.getChildren()[i].moveSpeed = val
+            }
+        })
+        gui_enemy.add(data.enemy, 'damage').min(1).max(300).step(1);
+        gui_enemy.add(data.enemy, 'clear');
+        gui_enemy.open();
