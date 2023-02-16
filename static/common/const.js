@@ -110,7 +110,7 @@ let data = {
 
 
 const gui_w = new dat.gui.GUI();
-let gui_weapon = gui_w.addFolder('Weapon');
+let gui_weapon = gui_w.addFolder('=== Weapon ===');
     gui_weapon.open();
 
 let gui_iceball = gui_weapon.addFolder('Iceball');
@@ -174,7 +174,7 @@ const gui = new dat.gui.GUI();
         }
     })
     
-    let gui_player = gui.addFolder('Player');
+    let gui_player = gui.addFolder('=== Player ===');
         gui_player.add(data.player, 'health').min(1).max(1000).step(1).listen();
         gui_player.add(data.player, 'moveSpeed').min(1).max(500).step(1);
         gui_player.open();
@@ -190,7 +190,7 @@ const gui = new dat.gui.GUI();
         gui_exp.add(data.exp, 'clear');
         gui_exp.open();
     
-    let gui_enemy = gui.addFolder('Enemy');
+    let gui_enemy = gui.addFolder('=== Enemy ===');
         gui_enemy.add(data.enemy, 'active');
         gui_enemy.add(data.enemy, 'health').min(1).max(1000).step(1).onChange((val)=>{
             let scene = game.scene.keys.gamePlay
