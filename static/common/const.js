@@ -92,7 +92,7 @@ let data = {
             damageCD: 0.6,
             spawnCD: 1.3,
             maxAmount: 10,
-            size: 40,
+            size: 50,
             clear: function(){
                 let grp = game.scene.keys.gamePlay.weapon.swords
                 destroyGroup( grp )

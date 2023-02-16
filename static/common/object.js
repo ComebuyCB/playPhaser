@@ -241,7 +241,7 @@ class createSword extends Phaser.GameObjects.Sprite {
     init(){
         this.scene.physics.world.enableBody(this);
         this.setScale(0.001 * data.weapon.sword.size);
-        this.body.setCircle(2000*0.5);
+        this.body.setCircle(1200*0.5);
         this.body.setBounce(1);
         this.scene.add.existing(this);
     }
