@@ -1,4 +1,5 @@
 // Phaser.Physics.Arcade.Sprite
+
 class createPlayer extends Phaser.GameObjects.Sprite {
     constructor( scene ){
         super( scene, cw/2, ch/2, 'person');
@@ -8,17 +9,18 @@ class createPlayer extends Phaser.GameObjects.Sprite {
             x: 150,
             y: 0,
         }
+
         this.init();
     }
 
     init(){
         this.scene.physics.world.enableBody(this);
         this.setScale(0.6);
-        this.setSize(20,50);
         this.anims.play('playerAnim-right', true);
+        this.body.setSize(20,50);
         this.body.setOffset(12,10);
-        this.body.setCollideWorldBounds(true);
         this.body.setBounce(1);
+        this.body.setCollideWorldBounds(true);
         this.scene.add.existing(this);
     }
     update(){
@@ -109,7 +111,6 @@ class createPlayer extends Phaser.GameObjects.Sprite {
 }
 
 
-
 class createEnemy extends Phaser.GameObjects.Sprite {
     constructor( scene ){
         let rx = ~~(Math.random()*2)
@@ -128,9 +129,9 @@ class createEnemy extends Phaser.GameObjects.Sprite {
     init(){
         this.scene.physics.world.enableBody(this);
         this.setScale(0.6);
-        this.anims.play('enemyAnim-down');
+        this.anims.play('enemyAnim-down', true);
         this.body.setSize(20,50);
-        this.body.setOffset(12,10);
+        this.body.setOffset(10,10);
         this.body.setBounce(1);
         this.scene.enemies.add(this);
         this.scene.add.existing(this);
@@ -236,6 +237,7 @@ class createSword extends Phaser.GameObjects.Sprite {
             speedInc: 0.05,
         }
         this.damagedTargetsTime = {};
+
         this.init();
     }
     init(){
@@ -271,7 +273,6 @@ class createHurtText extends Phaser.GameObjects.Text {
         this.startTime = scene.time.now;
         this.destroyTime = 1000;
 
-        scene.hurtTexts.add(this);
         this.init();
     }
     init(){

@@ -17,7 +17,7 @@
     <style>
         * { box-sizing: border-box; position: relative; }
         html { padding: 0; margin: 0; font-family: '微軟正黑體'; font-weight: 900; }
-        body { max-width: 1400px; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        body { max-width: 1340px; height: 100vh; display: flex; justify-content: center; align-items: center; }
 
         .pos-7 { position: absolute; left: 0; top: 0; z-index: 1; }
         .pos-8 { position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 1; }
@@ -30,13 +30,14 @@
         .p-2 { padding: 0.5rem; }
 
         #expBar { margin-top: 8px; padding: 0 2px; font-weight: bold; width: 500px; border: 1px solid #aaa; --percent: 0%; background: linear-gradient(to right, lime 0%, lime var(--percent), lightgray var(--percent), lightgray 100%); }
+        canvas { width: 100%; }
     </style>
 </head>
 <body class="flex-cc">
     <div id="wrap">
         <div class="flex-ub">
             <div></div>
-            <div>目前經驗值沒用處~</div>
+            <div>目前玩家血量&經驗值沒用處~</div>
             <div></div>
         </div>
         <div id="app">

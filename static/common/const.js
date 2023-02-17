@@ -29,10 +29,10 @@ let data = {
     },
     world: {
         bounce: {
-            x: 0 - cw / 2, 
+            x: 0 - cw/2 / 2,
             y: 0 - ch / 2,
-            width: cw * 2,
-            height: ch * 2,
+            width: cw + cw/2,
+            height: ch + ch,
         }
     },
     player: {

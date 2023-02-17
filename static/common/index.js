@@ -3,7 +3,6 @@ const gamePlay = {
     preload(){
         this.load.image('map','static/img/map.jpg' )
         this.load.image('arrow','static/img/arrow.png' )
-        this.load.image('tree','static/img/tree.png' )
         this.load.image('border','static/img/border.png' )
         this.load.spritesheet('personImg', 'static/img/player2.png', { frameWidth: 47, frameHeight: 71, } )
         this.load.spritesheet('expImg', 'static/img/exp.png', { frameWidth: 192, frameHeight: 192, } )
@@ -20,6 +19,7 @@ const gamePlay = {
 
 
     /*=== groups ===*/
+        this.trees = this.add.group();
         this.enemies = this.add.group();
         this.exps = this.add.group();
         this.weapon = [];
@@ -32,12 +32,8 @@ const gamePlay = {
 
     /*=== map ===*/
     // this.map = this.add.sprite(cw/2, ch/2, 'map')
-        this.map = this.add.tileSprite(0, 0, cw, ch, 'map')
+        this.map = this.add.tileSprite(bx, by, bw, bh, 'map');
         this.map.setOrigin(0, 0)
-        this.map.setScrollFactor(0)
-
-        // this.tree = this.add.tileSprite(cw/2, ch/2, cw, ch, 'tree')
-        // this.tree.setScrollFactor(0)
 
         const borderThick = {x:72, y:48,}
         this.border = this.add.sprite(cw/2, ch/2, 'border')
@@ -61,8 +57,12 @@ const gamePlay = {
 
     /*=== player & mouseArrow ===*/
         this.player = new createPlayer(this);
-        this.myCam = this.cameras.main.startFollow(this.player);
         this.mouseArrow = new createMouseArrow(this);
+        
+        
+    /*=== camera ===*/
+        this.myCam = this.cameras.main.startFollow(this.player,false);
+        this.myCam.setBackgroundColor(0x664422);
 
 
     /*=== objects / time ===*/
@@ -108,7 +108,7 @@ const gamePlay = {
         this.physics.add.collider(this.enemies, this.weapon.fireballs, (enemy, fireball) => {
             enemy.health -= fireball.damage;
             data.totalDamage.fireball += fireball.damage;
-            new createHurtText(this, enemy.x, enemy.y, -fireball.damage, { color: '#c00', })
+            This.hurtTexts.add( new createHurtText(This, enemy.x, enemy.y, -fireball.damage, { color: '#c00', }) );
             fireball.destroy()
         })
 
@@ -118,7 +118,7 @@ const gamePlay = {
                 enemy.health -= iceball.damage;
                 data.totalDamage.iceball += iceball.damage;
                 iceball.penetrate -= 1;
-                new createHurtText(this, enemy.x, enemy.y, -iceball.damage, { color: '#059', })
+                This.hurtTexts.add( new createHurtText(this, enemy.x, enemy.y, -iceball.damage, { color: '#059', }) );
             }
         })
 
@@ -127,7 +127,7 @@ const gamePlay = {
                 sword.damagedTargetsTime[enemy.id] = this.time.now;
                 enemy.health -= sword.damage;
                 data.totalDamage.sword += sword.damage;
-                new createHurtText(this, enemy.x, enemy.y, -sword.damage, { color: '#0af', })
+                This.hurtTexts.add( new createHurtText(This, enemy.x, enemy.y, -sword.damage, { color: '#0af', }) );
             }
         })
 
@@ -136,7 +136,7 @@ const gamePlay = {
             boom.damagedTargets.push( enemy.id );
             enemy.health -= boom.damage;
             data.totalDamage.boom += boom.damage;
-            new createHurtText(this, enemy.x, enemy.y, -boom.damage, { color: '#f00', fontSize: 20, });
+            This.hurtTexts.add( new createHurtText(this, enemy.x, enemy.y, -boom.damage, { color: '#f00', fontSize: 20, }) );
         })
 
         this.physics.add.overlap(this.player, this.exps, (player, exp)=>{
@@ -149,11 +149,13 @@ const gamePlay = {
                 player.hurtTime = this.time.now;
                 enemy.hurtPlayerLastTime = this.time.now;
                 data.player.health -= enemy.damage; // player.health -= enemy.damage;
-                new createHurtText(this, player.x, player.y - 30, -enemy.damage, { color: '#f00', fontSize: 18, strokeThickness: 5, } )
+                This.hurtTexts.add( new createHurtText(this, player.x, player.y - 30, -enemy.damage, { color: '#f00', fontSize: 18, strokeThickness: 5, }) );
             }
         })
 
         this.physics.add.collider(this.enemies, this.enemies);
+        this.physics.add.collider(this.player, this.trees);
+        this.physics.add.collider(this.enemies, this.trees);
 
         this.toggleDebug = false;
         console.log('sceneCreated:', this);
@@ -177,8 +179,8 @@ const gamePlay = {
 
 
     /*=== map ===*/
-        this.map.tilePositionX = this.myCam.scrollX
-        this.map.tilePositionY = this.myCam.scrollY
+        // this.map.tilePositionX = this.myCam.scrollX
+        // this.map.tilePositionY = this.myCam.scrollY
         // this.map.tilePositionX = this.sys.game.loop.frame * 10 // 類似空戰感
         // this.tree.tilePositionX = this.player.x
         // this.tree.tilePositionY = this.player.y
